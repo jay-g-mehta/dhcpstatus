@@ -1,4 +1,10 @@
 import setuptools
 
-setuptools.setup(entry_points={
-    'console_scripts': ['dhcpstatus_subnet = dhcpstatus.dhcp_status:main_subnet_status']})
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
+
+setuptools.setup(
+    install_requires=required,
+    entry_points={
+        'console_scripts': ['dhcpstatus_subnet = dhcpstatus.dhcp_status:main_subnet_status']})

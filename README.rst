@@ -157,4 +157,4 @@ Installing **dhcpstatus**
 
 .. code:: bash
 
-    $ pip install dhcpstatus -r requirements.txt
+    $ pip install dhcpstatus
