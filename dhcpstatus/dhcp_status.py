@@ -55,13 +55,16 @@ class DHCPStatus(object):
         for mac, lease in active_leases.iteritems():
             for iprange in subnets:
                 if lease.ip in netaddr.IPRange(iprange[0], iprange[1]):
-                    subnets[iprange]['status']['IPs'].append(lease.ip)
-                    subnets[iprange]['status']['MACs'].append(mac)
-                    subnets[iprange]['status']['IPs in use'] = subnets[iprange]['status']['IPs in use'] + 1
-                    subnets[iprange]['status']['IPs free'] = subnets[iprange]['status']['IPs free'] - 1
-
+                    s = subnets[iprange]['status']
+                    s['IPs'].append(lease.ip)
+                    s['MACs'].append(mac)
                     break
 
+        for iprange in subnets:
+            s = subnets[iprange]['status']
+            l = len(s['IPs'])
+            s['IPs in use'] = l
+            s['IPs free'] = s['IPs defined'] - l
         return subnets
 
 
