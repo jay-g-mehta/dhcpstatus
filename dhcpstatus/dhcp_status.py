@@ -37,7 +37,7 @@ class DHCPStatus(object):
 
     def subnet_status(self):
         """Returns subnet status with active IP lease information
-        Subnet | Netmask | Low IP range | High IP range | Total IPs | IPs free | IPs in use | IPs | MACs
+        Subnet | Netmask | Low IP range | High IP range | Total IPs | IPs free | IPs in use | IPs | MACs | Hostname
         """
         subnets = self.dhcpd_parser.get_subnets()
         for iprange in subnets:
@@ -48,7 +48,8 @@ class DHCPStatus(object):
                 'IPs in use': 0,
                 'IPs free': len_r,
                 'IPs': [],
-                'MACs': []
+                'MACs': [],
+                'Hostname': []
             }
 
         active_leases = self.dhcpd_lease.leases.get_current()
@@ -58,6 +59,7 @@ class DHCPStatus(object):
                     s = subnets[iprange]['status']
                     s['IPs'].append(lease.ip)
                     s['MACs'].append(mac)
+                    s['Hostname'].append('-' if not lease.hostname else lease.hostname)
                     break
 
         for iprange in subnets:
@@ -72,26 +74,28 @@ def main_subnet_status():
     """CLI way of invoking subnet status for DHCP"""
     status = DHCPStatus(sys.argv[1], sys.argv[2])
     subnet_states = status.subnet_status()
-    print "{:20s} | {:20s} | {:20s} | {:20s} | {:15s} | {:15s} | {:15s} | {:20s} | {:20s}".format(
+    print "{:20s} | {:20s} | {:20s} | {:20s} | {:15s} | {:15s} | {:15s} | {:20s} | {:20s} | {:20s}".format(
         "Subnet", "Netmask", "Low Address", "High Address",
-        "IPs defined", "IPs free", "IPs in use", "IPs", "MACs")
+        "IPs defined", "IPs free", "IPs in use", "IPs", "MACs", "Hostname")
 
-    status_format = "{:20s} | {:20s} | {:20s} | {:20s} | {:15d} | {:15d} | {:15d} | {:20s} | {:20s}"
+    status_format = "{:20s} | {:20s} | {:20s} | {:20s} | {:15d} | {:15d} | {:15d} | {:20s} | {:20s} | {:20s}"
     for key, s in subnet_states.items():
         ip_list = s['status']['IPs']
         mac_list = s['status']['MACs']
+        hostname_list = s['status']['Hostname']
         if ip_list == []:
             ip_list.append("-")
             mac_list.append("-")
+            hostname_list.append("-")
         print status_format.format(
             s['subnet'], s['netmask'], s['pool']['range'][0], s['pool']['range'][1],
             s['status']['IPs defined'], s['status']['IPs free'], s['status']['IPs in use'],
-            ip_list[0], mac_list[0]
+            ip_list[0], mac_list[0], hostname_list[0]
         )
 
         for i in range(1, len(ip_list)):
-            print "{:20s} | {:20s} | {:20s} | {:20s} | {:15s} | {:15s} | {:15s} | {:20s} | {:20s}".format(
-                "", "", "", "", "", "", "", ip_list[i], mac_list[i])
+            print "{:20s} | {:20s} | {:20s} | {:20s} | {:15s} | {:15s} | {:15s} | {:20s} | {:20s} | {:20s}".format(
+                "", "", "", "", "", "", "", ip_list[i], mac_list[i], hostname_list[i])
 
 
 if __name__ == "__main__":
